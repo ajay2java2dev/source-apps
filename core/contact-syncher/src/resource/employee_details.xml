@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Employee">
+    <!-- Perform insert operations -->
+    <insert id = "insert" parameterClass = "Person">
+        insert into person (first_name,middle_name,last_name,unique_id_if_any)
+        values (#first_name#, #middle_name#, #last_name#,#unique_id_if_any#)
+        <selectKey resultClass="int" keyProperty="person_id">
+            select last_insert_id () as person_id
+        </selectKey>
+    </insert>
+
+    <insert id = "insert" parameterClass = "Employee">
+        insert into employee (person_id, salary) values (#person_id#, #salary#)
+        <selectKey resultClass="int" keyProperty="emp_id">
+            select last_insert_id () as emp_id
+        </selectKey>
+    </insert>
+
+    <!-- Perform read operations -->
+    <select id="getAllEmployeeDetails" resultClass="Employee">
+        select per.*,emp.salary from person per
+        left join employee emp on per.person_id = emp.person_id
+    </select>
+
+    <!-- Perform update operations -->
+    <select id="updateEmployee" resultClass="Employee">
+        update employee set salary = #salary# where emp_id = #emp_id#
+    </select>
+
+    <!-- Perform delete operations -->
+    <select id="deleteEmployee" parameterClass="Employee">
+        delete from employee where emp_id = #emp_id#
+    </select>
+
+    <!-- Call stored procedure -->
+    <procedure id="getEmpProcInfo" resultClass="Employee" parameterMap="getEmpProcInfoCall">
+        { call proc_get_employee_details (#person_id#)
+    </procedure>
+
+    <parameterMap id="getEmpProcInfoCall" class="map">
+        <parameter property="person_id" jdbcType="INT" javaType="java.lang.Integer" mode="IN"/>
+    </parameterMap>
+
+</sqlMap>
